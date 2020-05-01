@@ -16,12 +16,199 @@ A big advantage that the C programming language has over interpreter based langu
 
 There are specific preprocessor directives, such as `#include` and `#define` which you should all be familiar with. One can also create conditional statements that allow for the preprocessor to either include or not include code sections. This is done with the directives `#if`, `#ifdef` and `#ifndef`. A common example of these directives would be when performing "feature inclusion" via compiled flags.
 
+<<<<<<< HEAD
+## Git
+
+So what is Git?
+
+I hope you all already know the answer to this. Git is a version control software that is now more or less the gold standard in code version control used around the world. As such, knowing Git is a very important skill in today's workplace for anyone that has anything to do with the development of code, regardless of the code type. It can be useful not just code projects but for the version control of any sort of project based around non-binary files, such as PCB designs.
+
+So without writing a big blurb on Git, I say we just get into it and learn by doing.
+
+## What is Forking?
+
+So you will of now forked my repo from GitHub. What this means is that you have more or less copied (not cloned) my repo. It is a complete copy, including the Git histroy, Git objects etc. The key point is that it now belongs to you and you can do as you wish with it, without disturbing my original repo. It is a handy feature that is implemented by the Git server systems (such as GitLab and GitHub), it is not intrinsically a part of Git. It allows for developers to essentially snapshot someone's project, modify it and then, if they want, they can send the changes back to the original developer who can decide if they want to merge their changes into the original code. Forking is popular in the open source community where people are not always directly included in someone's project.
+
+Throughout this tutorial we will do two things, we will set up a new repository for you to use throughout the semester to manage your code and we will undertake some little challenges in this repository to help further your Git and C abilities.
+
+## Basics
+
+Now the very basics of Git. Git works using repositories (previously mentioned repos). Repos are essentially a mini filesystem (locally seen as a folder) in which all changes, that happen within that folder, are (or can be) tracked. 
+Git monitors changes to files and stores snapshots of the files at specified points. By snapshotting the file system, Git gives each point point in the repo's history a unique value.
+Enabling a developer to revert changes, go back and look at previous, or parallel, version as well as lots of other cool stuff we will cover a bit more later.
+
+Without going into it too much now, we know that a Git repo will give us a folder, whose content will be tracked. So now let's set up the repo that you will use throughout semester.
+
+For anyone doing this that is not one of my students you will have to just ignore the specifics aimed at my students.
+
+You can either use the LRZ GitLab or a **private** GitHub repo for this, the functionality is identical. 
+Do not use a public GitHub as other students will be able to view your code and you might be involved in some nasty business if duplicate code is found in another student's project.
+
+So now you will need to create a new project. This will require you to do the following:
+
+1. Create a new project/repository in the web GUI
+2. Either follow the given instructions to clone the new repository or copy the clone link so you can clone the repository to your machine which I will explain now.
+
+  There are two types of links always available, one via SSH and the other via HTTPS. SSH allows you to upload your public SSH key to the server and use it to authenticate yourself when interacting with the server, 
+meaning you do not have to constantly enter your username and password when interacting with the server. In contrast HTTPS requires you to enter your username and password in the terminal every time you interact with the server when authentication is required.
+
+  I recommend uploading a SSH key and using the SSH link. Google how to do this, its not hard.
+
+  Then to clone the repository you simply have to run the `git clone` command. Looking at the manual page for the clone command (`man git clone`) we can see that the command takes the form of `git clone <options> <repository> <directory>`. For us we will just use the basic command to clone our newly created repository into a folder called "ESPL_code". From the folder where you would like to have your `ESPL_code` folder stored run
+
+  ``` bash
+  git clone <SSH or HTTPS URL> ESPL_code
+  ```
+
+  Now we will have the Git repo on our local machines. Next we will look into the basics of creating and storing code in our repository.
+ Please note that after the basics of the "ESPL_code" repository are set up we will do the rest of this tutorial in the tutorial repository, I am just wanting to make sure you have a Git repo set up and ready for the rest of semester so that you USE IT!
+
+# How Git Tracks Your Changes
+
+Git works slightly differently to other version control software in that is uses a staging area to which a user adds files that he/she wishes to be tracked (changes recorded). 
+As such Git does not automatically track all changes in a repository. It is up to the user to make sure that the files that they are interested in are added to the staging area, there are ways to wildcard add things but this can lead to very messy and unprofessional repos.
+
+As such the workflow follows the flow of:
+
+1. Working directory
+
+  Here a developer can modify/create/delete files in their project, just do your thing....write your code etc.
+
+2. Staging area
+
+  Here are the files that the user has told Git are important and should be tracked. If a file is not here then Git will not care for the changes made to that file. 
+ Files are added to the staging area using the `git add` command. Use `man git add` for a more detailed overview. It's quite straight forward.
+
+3. Repository
+
+  Once files have been added to the staging area, using `git add`, they can then be committed to the repository. A commit represents a snapshot in the repo's file system. 
+  The difference between two commits as seen as a set of changes to a set of files, also synonymous to a patch (funnily enough a lot of modern patches come straight from Git commits). 
+  Also note that that your changes and repository are local and not automatically sent to your Git server, this must be done manually. 
+  As such one must commit changes to your repository and then push the commits to the remote server, but we will get to this a little later.
+
+The benefit of having a staging area is that a user can create separate commits for different chunks of work. If you modified two separate files you could add each file to the staging area individually, 
+commit the changes, thus creating a psudo patch for that file then add and commit the second file creating a separate patch for the second file. 
+While this functionality will most likely not be that useful for you in ESPL, it is an important concept to grasp, especially for industry work where the generation of patches is very important. 
+As you should not have random files contained within your patches, such as debug files, knowing how to control the contents of a commit is very important.
+
+Storing changes to file in the staging area are done using the `git commit` command. See `man git commit` for details. We will see how this is done in practice shortly and it should become clear if it's not making complete sense at the moment.
+
+## What is a Commit?
+
+Now that we know the rough workflow of Git, I feel that it will help to make the entire process of Git and tracking changes clearer if what a commit is is outlined.
+
+A commit holds the state of the repository at the moment when the commit was created. This state is just a node in a linked list of the repository's previous states, 
+with the commit node's parent(s) being the commits that came before it during the development within the Git repository. 
+Git does not store the delta of each file like other versioning control software but instead creates copies of changed files, unchanged files are thus able to be simply referenced, 
+such that that unnecessary copies of unchanged file are not made. This allows the user to navigate through this linked list of commits to look at the repository's snapshots at different points in time. 
+As such, Git is more or less a mini filesystem that has some powerful tooling to achieve some pretty nifty tricks.
+
+## Lets Commit!
+
+Now let's put this into practice. Git repositories almost always contain a README.md file. The README is responsible for giving an overview of and/or instructions for the project on the GitHub/GitLab page 
+when one views the repository in the web interface, as you are probably doing now.
+
+The README usually contains useful information outlining the project, how to build it, developer's contact information etc. As such, we will create and add one to our newly created ESPL repository. 
+Please then create, in your ESPL repository, a `README.md` file. The `.md` signifys that it is a markdown fil, allowing for markdown formatting of the text. 
+Markdown formatting information can be found [here](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet#links).
+
+Please add your name and a quick description to the README then we will go through and add it.
+
+``` bash
+echo "# Your name here" > README.md
+echo "A quick description" >> README.md
+```
+
+This will create the file and add your name and a description to the file, with your name being a H1 title.
+
+Every time you make a change to the contents of your Git repository you can see the status of the repository using the command `git status`.
+
+Running that now will show us a few things
+
+```
+On branch master
+
+No commits yet
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	README.md
+
+nothing added to commit but untracked files present (use "git add" to track)
+```
+
+We can see that we are on our Master branch (we will cover branches a little later) and that we have the file `README.md` as an untracked file, meaning it is not in the staging area and would not be included in any commits.
+
+Let's for testing purposes try and commit our README without adding it to the staging area. Looking at the manual for the `git commit` command (running `man git commit`). 
+We can see the commands which can be used to add and remove files from the staging area (read the description section). Now a commit always requires a commit message, given using the `-m` option. 
+Commit messages should always be precise and describe what changes have been implemented in this commit. Think of the commit message as a title/description for the patch that would be generated from the commit. 
+As such to "attempt" to commit our README without adding it to the staging area we would run
+
+``` bash
+git commit -m "Added README"
+```
+
+We will now see that Git complains that nothing was added to the commit, meaning the staging area was empty. As we should all know by now, we need to add the `README.md` to the staging area. 
+To do this we can either add the individual file or add all files in the repository. I would recommend avoiding adding all file where possible as you tend to include a lot of junk. We will cover how to avoid this a little later on.
+
+For now add your README using
+
+``` bash
+git add README.md
+```
+
+Now attempting to commit should result in the output
+
+```
+[master (root-commit) 3c2b284] Added README
+ 1 file changed, 2 insertions(+)
+ create mode 100644 README.md
+```
+***************************************************************************************************
+Showing us a few things. It shows us our branch `master`, the beginning of the commit hash `3c2b284`, the commit message `Added README`, the changes made as well as the files added, in this case the `README.md`.
+To find out what the mode is read [here](https://stackoverflow.com/questions/737673/how-to-read-the-mode-field-of-git-ls-trees-output/8347325#8347325).
+
+We have now successfully created a commit in our repository. Running `git log` we can see that the commit now appears in the repository's logs. In the log you can also see the entire commit hash which is used to identify that specific commit within your repo.
+
+In a repo you will create many commits as you implement features and commit them, the commits will not be automatically visible to others who also have the repository on their machines or are looking through the web interface. Git does not automatically sync changes as it is designed to be usable offline, only syncing when told to. To then send your commits to the remote repository, stored on a Git server, you must `git push`. To understand what we are doing exactly when we are pushing we need to know a couple of things.
+
+To push our code to the Git server we us the command `git push origin master`.
+
+Breaking this command down we have:
+
+ * `git push`, this is the command the tells Git to send all of the commits saved locally on your machine to the remote server.
+ * `origin`, is the alias given to the remote server where our repository is stored. If you look into the `.git/config` file in your repositories root directory you will see something similar to the following
+
+  ```
+  ...                                                 
+  [remote "origin"]                                                                
+    url = git@git.alxhoff.com:alxhoff/espl-test.git                              
+    fetch = +refs/heads/*:refs/remotes/origin/*                                   
+  ...
+  ```
+
+  This is telling us that when we use `origin` we will be sending our commits to the server specified by that alias. It is possible to send to multiple servers at once, for instance a backup server, or to send to both a private and public server.
+
+* `master`, tells Git which branch's commits we are wanting to send. We will cover branches soon.
+
+Running `git push origin master` will show us the following
+
+```
+Enumerating objects: 3, done.
+Counting objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 253 bytes | 253.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0)
+To git.alxhoff.com:alxhoff/espl-test.git
+ * [new branch]      master -> master
+=======
 ``` C
 #ifdef USE_AMAZING_FEATURE
 device_t dev = amazing_device
 #else
 device_t dev = NULL
 #endif
+>>>>>>> origin/compiling
 ```
 
 ### Include and Define Directives
